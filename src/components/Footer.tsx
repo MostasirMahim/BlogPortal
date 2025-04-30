@@ -58,7 +58,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/category/politics"
+                  href="/site/politics"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Politics
@@ -66,7 +66,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/category/technology"
+                  href="/site/technology"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Technology
@@ -74,7 +74,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/category/business"
+                  href="/site/business"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Business
@@ -82,7 +82,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/category/health"
+                  href="/site/health"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Health
@@ -90,7 +90,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/category/entertainment"
+                  href="/site/entertainment"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Entertainment
@@ -98,7 +98,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/category/sports"
+                  href="/site/sports"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Sports
@@ -112,7 +112,7 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
-                  href="/about"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   About Us
@@ -120,7 +120,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/contact"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Contact
@@ -128,7 +128,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/careers"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Careers
@@ -136,7 +136,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/advertise"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Advertise
@@ -144,7 +144,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/terms"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Terms of Service
@@ -152,7 +152,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/privacy"
+                  href="/"
                   className="text-muted-foreground hover:text-primary transition-colors"
                 >
                   Privacy Policy
@@ -161,14 +161,12 @@ export default function Footer() {
             </ul>
           </div>
           <div>
-          <h3 className="font-bold text-lg mb-4">Subscribe</h3>
-          <p className="text-muted-foreground mb-4">
-            Subscribe to our newsletter for daily updates on the latest news and
-            exclusive content.
-          </p>
-
-          <Button className="w-full">Subscribe</Button>
-        </div>
+            <h3 className="font-bold text-lg mb-4">Subscribe</h3>
+            <p className="text-muted-foreground mb-4">
+              Subscribe to our newsletter for daily updates on the latest news
+              and exclusive content.
+            </p>
+          </div>
         </div>
 
         <Separator className="my-4" />
@@ -179,27 +177,25 @@ export default function Footer() {
           </p>
           <div className="flex space-x-4 mt-4 md:mt-0">
             <Link
-              href="/terms"
+              href="/"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Terms
             </Link>
             <Link
-              href="/privacy"
+              href="/"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Privacy
             </Link>
             <Link
-              href="/cookies"
+              href="/"
               className="text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               Cookies
             </Link>
           </div>
-          
         </div>
-        
       </div>
     </footer>
   );

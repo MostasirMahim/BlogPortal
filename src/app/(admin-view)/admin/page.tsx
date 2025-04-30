@@ -36,27 +36,31 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-// Import dummy data
 import { articles, userArticles } from "@/lib/dummy";
+import { useQuery } from "@tanstack/react-query";
+import { getAdminData } from "@/actions/admin.action";
+import { LoadingPage } from "@/components/ui/loading";
 
- function AdminDashboard() {
+function AdminDashboard() {
   const [timeRange, setTimeRange] = useState("week");
-
-  // Combine all articles for the dashboard
   const allArticles = [...articles, ...userArticles];
 
-  // Dashboard stats
+  const { data: admin_data, isLoading: admin_isLoading } = useQuery({
+    queryKey: ["adminStat"],
+    queryFn: () => getAdminData(),
+  });
+
   const stats = [
     {
       title: "Total Users",
-      value: "1,248",
+      value: admin_data?.totalUsers || 0,
       change: "+12.5%",
       trend: "up",
       icon: <Users className="h-5 w-5" />,
     },
     {
       title: "Total Posts",
-      value: "843",
+      value: admin_data?.totalPosts || 0,
       change: "+8.2%",
       trend: "up",
       icon: <FileText className="h-5 w-5" />,
@@ -77,7 +81,6 @@ import { articles, userArticles } from "@/lib/dummy";
     },
   ];
 
-  // Activity data
   const recentActivity = [
     {
       id: 1,
@@ -130,11 +133,16 @@ import { articles, userArticles } from "@/lib/dummy";
     },
   ];
 
-  // Popular posts data
   const popularPosts = allArticles
     .sort((a, b) => b.likeCount - a.likeCount)
     .slice(0, 5);
 
+  if (admin_isLoading)
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <LoadingPage />
+      </div>
+    );
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">

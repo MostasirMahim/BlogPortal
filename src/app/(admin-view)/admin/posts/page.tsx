@@ -43,43 +43,43 @@ import {
 } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Import dummy data
-import { articles, userArticles } from "@/lib/dummy";
-
-// Combine all articles for the admin panel
-const allArticles = [...articles, ...userArticles].map((article) => ({
-  ...article,
-  featured: Math.random() > 0.7, // Randomly set some articles as featured
-  status: Math.random() > 0.9 ? "Draft" : "Published", // Randomly set some articles as drafts
-}));
+import { getAllPosts } from "@/actions/admin.action";
+import { useQuery } from "@tanstack/react-query";
+import { formatJoinedDate } from "@/lib/date_modify";
+import { useRouter } from "next/navigation";
+import { LoadingPage } from "@/components/ui/loading";
 
 export default function PostsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("all");
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const router = useRouter();
 
-  // Get unique categories
-  const categories = Array.from(
-    new Set(allArticles.map((article) => article.category))
-  );
-
-  // Filter articles based on search query and filters
-  const filteredArticles = allArticles.filter((article) => {
-    const matchesSearch =
-      article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.author.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      article.category.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesCategory =
-      selectedCategory === "all" || article.category === selectedCategory;
-    const matchesStatus =
-      selectedStatus === "all" || article.status === selectedStatus;
-
-    return matchesSearch && matchesCategory && matchesStatus;
+  const { data: allArticles, isLoading: post_isLoading } = useQuery({
+    queryKey: ["all_Posts"],
+    queryFn: () => getAllPosts(),
   });
 
-  // Handle select all
+  const categories = Array.from(
+    new Set(allArticles?.map((article) => article.category))
+  );
+
+  const filteredArticles =
+    allArticles?.filter((article) => {
+      const matchesSearch =
+        article.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        article.author?.name
+          .toLowerCase()
+          .includes(searchQuery.toLowerCase()) ||
+        article.category.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesCategory =
+        selectedCategory === "all" || article.category === selectedCategory;
+
+      return matchesSearch && matchesCategory;
+    }) || [];
+
   const handleSelectAll = () => {
     if (selectedItems.length === filteredArticles.length) {
       setSelectedItems([]);
@@ -88,7 +88,6 @@ export default function PostsPage() {
     }
   };
 
-  // Handle select item
   const handleSelectItem = (id: string) => {
     if (selectedItems.includes(id)) {
       setSelectedItems(selectedItems.filter((item) => item !== id));
@@ -97,12 +96,11 @@ export default function PostsPage() {
     }
   };
 
-  // Handle bulk actions
   const handleBulkAction = (action: string) => {
-    console.log(`Performing ${action} on:`, selectedItems);
-    // In a real app, you would call an API here
     setSelectedItems([]);
   };
+
+  if (post_isLoading) return <LoadingPage />;
 
   return (
     <div className="space-y-6">
@@ -286,7 +284,7 @@ export default function PostsPage() {
                       <div>
                         <div className="flex items-center gap-1">
                           <p className="font-medium">{article.title}</p>
-                          {article.featured && (
+                          {article.isFeatured && (
                             <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
                           )}
                         </div>
@@ -296,25 +294,19 @@ export default function PostsPage() {
                       </div>
                     </div>
                   </TableCell>
-                  <TableCell>{article.author}</TableCell>
+                  <TableCell>{article.author?.name || "Unknown"}</TableCell>
                   <TableCell>
                     <Badge variant="outline">{article.category}</Badge>
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        article.status === "Published" ? "default" : "secondary"
-                      }
-                      className={
-                        article.status === "Published"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                      }
+                      variant={"default"}
+                      className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                     >
-                      {article.status}
+                      "Published"
                     </Badge>
                   </TableCell>
-                  <TableCell>{article.date}</TableCell>
+                  <TableCell>{formatJoinedDate(article.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -325,14 +317,19 @@ export default function PostsPage() {
                       <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Actions</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem className="gap-2">
+                        <DropdownMenuItem
+                          onClick={() =>
+                            router.push(`/article/${article.slug}`)
+                          }
+                          className="gap-2"
+                        >
                           <Eye className="h-4 w-4" /> View
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2">
                           <Pencil className="h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2">
-                          {article.featured ? (
+                          {article.isFeatured ? (
                             <>
                               <StarOff className="h-4 w-4" /> Unfeature
                             </>

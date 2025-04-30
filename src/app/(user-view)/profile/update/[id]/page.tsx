@@ -1,10 +1,8 @@
 "use client";
 
 import type React from "react";
-
-import { useState, useRef } from "react";
+import { useState, useRef, use, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import {
   ArrowLeft,
   Upload,
@@ -28,33 +26,58 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Import dummy data
-import { currentUser } from "@/lib/dummy";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getProfile } from "@/actions/user.action";
+import { User as UserType } from "@/types";
+import { LoadingPage } from "@/components/ui/loading";
 
-function EditProfilePage() {
+interface Social {
+  twitter?: string;
+  facebook?: string;
+  instagram?: string;
+  linkedin?: string;
+}
+
+function EditProfilePage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const router = useRouter();
   const avatarInputRef = useRef<HTMLInputElement>(null);
   const coverInputRef = useRef<HTMLInputElement>(null);
 
-  // State for form data
   const [formData, setFormData] = useState({
-    name: currentUser.name,
-    username: currentUser.username,
-    email: currentUser.email,
-    bio: currentUser.bio,
-    location: currentUser.location,
-    website: currentUser.website || "",
-    twitter: currentUser.socialLinks.twitter || "",
-    facebook: currentUser.socialLinks.facebook || "",
-    instagram: currentUser.socialLinks.instagram || "",
-    linkedin: currentUser.socialLinks.linkedin || "",
+    name: "",
+    bio: "",
+    location: "",
+    website: "",
+    twitter: "",
+    facebook: "",
+    instagram: "",
+    linkedin: "",
+  });
+  const [avatarPreview, setAvatarPreview] = useState("");
+  const [coverPreview, setCoverPreview] = useState("");
+
+  const { data: USER, isLoading } = useQuery<UserType | null>({
+    queryKey: ["profileData"],
+    queryFn: () => getProfile(id),
+    enabled: !!id,
   });
 
-  // State for images
-  const [avatarPreview, setAvatarPreview] = useState(currentUser.avatar);
-  const [coverPreview, setCoverPreview] = useState(currentUser.coverImage);
+  useEffect(() => {
+    if (USER) {
+      setFormData({
+        name: USER.name,
+        bio: USER.bio || "",
+        location: USER.location || "",
+        website: USER.website || "",
+        twitter: (USER.social as Social)?.twitter || "",
+        facebook: (USER.social as Social)?.facebook || "",
+        instagram: (USER.social as Social)?.instagram || "",
+        linkedin: (USER.social as Social)?.linkedin || "",
+      });
+    }
+  }, [USER]);
 
-  // Handle input changes
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -62,11 +85,12 @@ function EditProfilePage() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle avatar upload
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+
     if (file) {
       const reader = new FileReader();
+
       reader.onload = (event) => {
         if (event.target?.result) {
           setAvatarPreview(event.target.result as string);
@@ -76,7 +100,6 @@ function EditProfilePage() {
     }
   };
 
-  // Handle cover image upload
   const handleCoverUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -90,39 +113,50 @@ function EditProfilePage() {
     }
   };
 
-  // Handle form submission
+  const { mutate: updateUser, isPending } = useMutation({
+    mutationFn: async (data: any) => {
+      const response = await fetch(`/api/profile/${id}`, {
+        method: "PATCH",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      router.push(`/profile/${id}`);
+    },
+    onError: (error) => {
+      console.error("Error updating user:", error);
+    },
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Create the complete user data object
     const updatedUserData = {
-      ...currentUser,
       name: formData.name,
-      username: formData.username,
-      email: formData.email,
       bio: formData.bio,
       location: formData.location,
       website: formData.website,
       avatar: avatarPreview,
-      coverImage: coverPreview,
-      socialLinks: {
+      cover: coverPreview,
+      social: {
         twitter: formData.twitter,
         facebook: formData.facebook,
         instagram: formData.instagram,
         linkedin: formData.linkedin,
       },
     };
-
-    // Log the updated user data to console
-    console.log("Updated User Profile:", updatedUserData);
-
-    // Show success message
-    alert("Profile updated successfully!");
-
-    // Navigate back to profile page
-    router.push("/profile");
+    updateUser(updatedUserData);
   };
 
+  if (isLoading) {
+    <div className="h-screen flex items-center justify-center">
+      <LoadingPage />
+    </div>;
+  }
   return (
     <div className="min-h-screen flex flex-col">
       <main className="flex-1 container mx-auto px-4 py-8">
@@ -142,11 +176,10 @@ function EditProfilePage() {
           <form onSubmit={handleSubmit} className="space-y-8">
             {/* Cover Image Section */}
             <div className="relative h-[200px] rounded-lg overflow-hidden bg-muted">
-              <Image
-                src={coverPreview || "/placeholder.svg"}
+              <img
+                src={coverPreview || USER?.cover || "/placeholder.jpg"}
                 alt="Cover"
-                fill
-                className="object-cover"
+                className="object-cover w-full h-full"
               />
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                 <div className="flex gap-2">
@@ -160,12 +193,14 @@ function EditProfilePage() {
                     <Upload className="h-4 w-4" />
                     Change Cover
                   </Button>
-                  {coverPreview !== currentUser.coverImage && (
+                  {coverPreview !== USER?.cover && (
                     <Button
                       type="button"
                       variant="destructive"
                       size="sm"
-                      onClick={() => setCoverPreview(currentUser.coverImage)}
+                      onClick={() =>
+                        setCoverPreview(USER?.cover || "/placeholder.jpg")
+                      }
                       className="gap-1"
                     >
                       <X className="h-4 w-4" />
@@ -186,11 +221,10 @@ function EditProfilePage() {
             {/* Avatar Section */}
             <div className="relative -mt-16 ml-4 md:ml-8">
               <div className="relative h-24 w-24 md:h-32 md:w-32 rounded-full overflow-hidden border-4 border-background">
-                <Image
-                  src={avatarPreview || "/placeholder.svg"}
+                <img
+                  src={avatarPreview || USER?.avatar || "/placeholder.jpg"}
                   alt="Avatar"
-                  fill
-                  className="object-cover"
+                  className="object-contain"
                 />
                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                   <Button
@@ -211,12 +245,14 @@ function EditProfilePage() {
                   />
                 </div>
               </div>
-              {avatarPreview !== currentUser.avatar && (
+              {avatarPreview !== "" && (
                 <Button
                   type="button"
                   variant="destructive"
                   size="icon"
-                  onClick={() => setAvatarPreview(currentUser.avatar)}
+                  onClick={() =>
+                    setAvatarPreview(USER?.avatar || "placeholder.jpg")
+                  }
                   className="absolute -right-2 -top-2 h-6 w-6 rounded-full"
                 >
                   <X className="h-3 w-3" />
@@ -259,26 +295,8 @@ function EditProfilePage() {
                         <Input
                           id="username"
                           name="username"
-                          value={formData.username}
-                          onChange={handleChange}
-                          required
-                        />
-                      </div>
-
-                      <div className="space-y-2 md:col-span-2">
-                        <Label
-                          htmlFor="email"
-                          className="flex items-center gap-1"
-                        >
-                          <Mail className="h-4 w-4" /> Email
-                        </Label>
-                        <Input
-                          id="email"
-                          name="email"
-                          type="email"
-                          value={formData.email}
-                          onChange={handleChange}
-                          required
+                          value={USER?.username}
+                          disabled
                         />
                       </div>
 
@@ -292,7 +310,8 @@ function EditProfilePage() {
                         <Textarea
                           id="bio"
                           name="bio"
-                          value={formData.bio}
+                          value={formData.bio || ""}
+                          placeholder="Tell us about yourself"
                           onChange={handleChange}
                           rows={4}
                         />
@@ -322,7 +341,7 @@ function EditProfilePage() {
                         <Input
                           id="location"
                           name="location"
-                          value={formData.location}
+                          value={formData.location || ""}
                           onChange={handleChange}
                           placeholder="City, Country"
                         />
@@ -444,7 +463,7 @@ function EditProfilePage() {
               </Button>
               <Button type="submit" className="gap-1">
                 <Save className="h-4 w-4" />
-                Save Changes
+                {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>
           </form>

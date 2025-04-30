@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import {
   Save,
@@ -39,7 +38,6 @@ import {
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 
-  // General settings state
   const [generalSettings, setGeneralSettings] = useState({
     siteName: "DailyNews",
     siteDescription:
@@ -51,7 +49,6 @@ export default function SettingsPage() {
     timeFormat: "h:mm a",
   });
 
-  // Content settings state
   const [contentSettings, setContentSettings] = useState({
     defaultCategory: "uncategorized",
     allowComments: true,
@@ -62,7 +59,6 @@ export default function SettingsPage() {
     maxUploadSize: "5",
   });
 
-  // Email settings state
   const [emailSettings, setEmailSettings] = useState({
     smtpServer: "smtp.example.com",
     smtpPort: "587",
@@ -73,7 +69,6 @@ export default function SettingsPage() {
     enableEmailNotifications: true,
   });
 
-  // Handle general settings change
   const handleGeneralChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
@@ -81,26 +76,13 @@ export default function SettingsPage() {
     setGeneralSettings((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle content settings change
   const handleContentChange = (name: string, value: any) => {
     setContentSettings((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Handle email settings change
   const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setEmailSettings((prev) => ({ ...prev, [name]: value }));
-  };
-
-  // Handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    console.log("Saving settings:", {
-      general: generalSettings,
-      content: contentSettings,
-      email: emailSettings,
-    });
-    // In a real app, you would call an API here
   };
 
   return (

@@ -712,14 +712,14 @@ export const popularArticles = [
 ]
 
 // Related articles data
-export const relatedArticles = {
+export const relatedArticles: Record<string, { id: number; title: string; description: string; date: string; image: string; slug: string; likeCount: number; commentCount: number; }[]> = {
   "global-summit-climate-change": [
     {
       id: 1,
       title: "Environmental Activists Launch Global Campaign for Climate Justice",
       description: "The campaign aims to raise awareness about climate change impacts.",
       date: "June 10, 2023",
-      image: "/placeholder.jpg?height=400&width=600&text=Related 1",
+      image: "https://www.carbonbrief.org/wp-content/uploads/2023/12/53395277155_1f62b0c011_k-1550x804.jpg",
       slug: "environmental-activists-campaign",
       likeCount: 42,
       commentCount: 8,
@@ -771,6 +771,168 @@ export function getCommentsBySlug(slug: string): Comment[] {
 
 // Function to get related articles for an article
 export function getRelatedArticlesBySlug(slug: string): any[] {
-  return relatedArticles[slug] || relatedArticles["global-summit-climate-change"] // Fallback to default
+  return relatedArticles[slug] || relatedArticles["global-summit-climate-change"]; // Fallback to default
 }
 
+export const DummyUsers = [
+    {
+      id: "clk1a2b3c4d5e6f7g8h9i0j",
+      clerkId: "user_2NNkAl3rxP8qJ5Zz1Qw",
+      name: "John Dummy",
+      username: "johndummy",
+      email: "john.dummy@example.com",
+      bio: "Senior software engineer with a passion for web development and open source projects.",
+      avatar: "https://randomuser.me/api/portraits/men/1.jpg",
+      cover: "https://images.unsplash.com/photo-1579546929518-9e396f3cc809",
+      website: "https://johndummy.dev",
+      location: "San Francisco, USA",
+      social: {},
+      createdAt: new Date("2022-01-15"),
+      updatedAt: new Date("2023-05-20"),
+      isfollowed: false
+    },
+    {
+      id: "clk2a3b4c5d6e7f8g9h0i1j",
+      clerkId: "user_3MMlBm4syQ9rK6Aa2Rx",
+      name: "Alice Wonder",
+      username: "alicewonder",
+      email: "alice.wonder@example.com",
+      bio: "UX designer and frontend developer focused on creating beautiful, accessible interfaces.",
+      avatar: "https://randomuser.me/api/portraits/women/2.jpg",
+      cover: "https://images.unsplash.com/photo-1605379399642-870262d3d051",
+      website: "https://alicewonder.design",
+      location: "London, UK",
+      social: {},
+      createdAt: new Date("2022-02-20"),
+      updatedAt: new Date("2023-06-15"),
+      isfollowed: true
+    },
+    {
+      id: "clk3a4b5c6d7e8f9g0h1i2j",
+      clerkId: "user_4NNmCn5tzR0sL7Bb3Sy",
+      name: "Bob Builder",
+      username: "bobbuilder",
+      email: "bob.builder@example.com",
+      bio: "Full-stack developer specializing in scalable cloud architectures and DevOps practices.",
+      avatar: "https://randomuser.me/api/portraits/men/3.jpg",
+      cover: "https://images.unsplash.com/photo-1484417894907-623942c8ee29",
+      website: "https://bobbuilder.tech",
+      location: "Berlin, Germany",
+      social: {},
+      createdAt: new Date("2022-03-10"),
+      updatedAt: new Date("2023-04-25"),
+      isfollowed: false
+    },
+    {
+      id: "clk4a5b6c7d8e9f0g1h2i3j",
+      clerkId: "user_5OOnDo6uaS1tM8Cc4Tz",
+      name: "Carol Code",
+      username: "carolcode",
+      email: "carol.code@example.com",
+      bio: "Backend developer with expertise in distributed systems and database optimization.",
+      avatar: "https://randomuser.me/api/portraits/women/4.jpg",
+      cover: "https://images.unsplash.com/photo-1550745165-9bc0b252726f",
+      website: "https://carolcode.dev",
+      location: "Toronto, Canada",
+      social: {},
+      createdAt: new Date("2022-04-05"),
+      updatedAt: new Date("2023-03-30"),
+      isfollowed: true
+    },
+    {
+      id: "clk5a6b7c8d9e0f1g2h3i4j",
+      clerkId: "user_6PPnEp7vbT2uN9Dd5Ua",
+      name: "David Data",
+      username: "daviddata",
+      email: "david.data@example.com",
+      bio: "Data scientist and machine learning engineer working on AI applications for healthcare.",
+      avatar: "https://randomuser.me/api/portraits/men/5.jpg",
+      cover: "https://images.unsplash.com/photo-1551288049-bebda4e38f71",
+      website: "https://daviddata.ai",
+      location: "Boston, USA",
+      social: {},
+      createdAt: new Date("2022-05-12"),
+      updatedAt: new Date("2023-02-18"),
+      isfollowed: false
+    },
+    {
+      id: "clk6a7b8c9d0e1f2g3h4i5j",
+      clerkId: "user_7QQoFq8wcU3vO0Ee6Vb",
+      name: "Eva Engineer",
+      username: "evaengineer",
+      email: "eva.engineer@example.com",
+      bio: "Software architect with a focus on microservices and cloud-native applications.",
+      avatar: "https://randomuser.me/api/portraits/women/6.jpg",
+      cover: "https://images.unsplash.com/photo-1517245386807-bb43f82c33c4",
+      website: "https://evaengineer.cloud",
+      location: "Stockholm, Sweden",
+      social: {},
+      createdAt: new Date("2022-06-20"),
+      updatedAt: new Date("2023-01-15"),
+      isfollowed: true
+    },
+    {
+      id: "clk7a8b9c0d1e2f3g4h5i6j",
+      clerkId: "user_8RRpGr9xdV4wP1Ff7Wc",
+      name: "Frank Frontend",
+      username: "frankfrontend",
+      email: "frank.frontend@example.com",
+      bio: "UI/UX enthusiast and React specialist creating engaging user experiences.",
+      avatar: "https://randomuser.me/api/portraits/men/7.jpg",
+      cover: "https://images.unsplash.com/photo-1461749280684-dccba630e2f6",
+      website: "https://frankfrontend.design",
+      location: "Amsterdam, Netherlands",
+      social: {},
+      createdAt: new Date("2022-07-08"),
+      updatedAt: new Date("2022-12-20"),
+      isfollowed: false
+    },
+    {
+      id: "clk8a9b0c1d2e3f4g5h6i7j",
+      clerkId: "user_9SSqHs0yeW5xQ2Gg8Xd",
+      name: "Grace Graphics",
+      username: "gracegraphics",
+      email: "grace.graphics@example.com",
+      bio: "Digital artist and web designer specializing in creative and interactive experiences.",
+      avatar: "https://randomuser.me/api/portraits/women/8.jpg",
+      cover: "https://images.unsplash.com/photo-1558655146-d09347e92766",
+      website: "https://gracegraphics.art",
+      location: "Melbourne, Australia",
+      social: {},
+      createdAt: new Date("2022-08-15"),
+      updatedAt: new Date("2022-11-10"),
+      isfollowed: true
+    },
+    {
+      id: "clk9a0b1c2d3e4f5g6h7i8j",
+      clerkId: "user_0TTrIt1zfX6yR3Hh9Ye",
+      name: "Henry Hacker",
+      username: "henryhacker",
+      email: "henry.hacker@example.com",
+      bio: "Cybersecurity expert and ethical hacker focused on making the web safer for everyone.",
+      avatar: "https://randomuser.me/api/portraits/men/9.jpg",
+      cover: "https://images.unsplash.com/photo-1510915228340-29c85a43dcfe",
+      website: "https://henryhacker.security",
+      location: "Tokyo, Japan",
+      social: {},
+      createdAt: new Date("2022-09-22"),
+      updatedAt: new Date("2022-10-05"),
+      isfollowed: false
+    },
+    {
+      id: "clk0a1b2c3d4e5f6g7h8i9j",
+      clerkId: "user_1UUuJu2agY7zS4Ii0Zf",
+      name: "Irene IoT",
+      username: "ireneiot",
+      email: "irene.iot@example.com",
+      bio: "IoT developer and hardware enthusiast building the future of connected devices.",
+      avatar: "https://randomuser.me/api/portraits/women/10.jpg",
+      cover: "https://images.unsplash.com/photo-1518770660439-4636190af475",
+      website: "https://ireneiot.tech",
+      location: "Seoul, South Korea",
+      social: {},
+      createdAt: new Date("2022-10-30"),
+      updatedAt: new Date("2022-09-15"),
+      isfollowed: true
+    }
+  ];

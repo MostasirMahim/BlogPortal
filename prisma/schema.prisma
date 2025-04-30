@@ -14,24 +14,122 @@ datasource db {
 }
 
 model User {
-  id    String     @id @default(cuid())
-  name  String
-  uername String @unique
-  password String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  posts Post[]
-  }
+  id        String    @id @default(cuid())
+  name      String
+  username  String    @unique
+  email     String    @unique
+  clerkId   String    @unique
+  bio       String?   @db.Text
+  avatar    String?
+  cover     String?
+  location  String?
+  website   String?
+  role      ROLE      @default(AUTHOR)
+  social    Json?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  
+  posts     Post[]
+  comments  Comment[]
+  likes     Like[]
+  followers Follows[] @relation("following")
+  following Follows[] @relation("follower")
 
-model Post {
-  id        String      @id @default(cuid())
-  title     String
-  content   String
-  published Boolean
-  author    User?    @relation(fields: [authorId], references: [id])
-  authorId  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  category  String?
+  notifications       Notification[] @relation("userNotifications")
+  notificationCreator Notification[] @relation("notificationCreator")
+
+  @@index([username])
 }
 
+enum ROLE {
+  ADMIN
+  AUTHOR
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  title      String
+  content    String   @db.Text
+  published  Boolean @default(true)
+  authorId   String?
+  views      Int      @default(0)
+  image      String?
+  category   String
+  tags       String[] @default([])
+  excerpt    String?   @db.Text
+  slug       String   @unique
+  readTime   String
+  isFeatured Boolean  @default(false)
+  isPinned   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  author        User?          @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  comments      Comment[]
+  likes         Like[]
+  notifications Notification[] @relation("postNotifications")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String   @db.Text
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post          Post           @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  notifications Notification[] @relation("commentNotifications")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  postId    String
+  userId    String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, postId])
+}
+
+model Follows {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
+
+  follower User @relation("follower", fields: [followerId], references: [id], onDelete: Cascade)
+
+  following User @relation("following", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId, followingId])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  creatorId String
+  type      NotificationType
+  read      Boolean          @default(false)
+  postId    String?
+  commentId String?
+  createdAt DateTime         @default(now())
+
+  // Relations
+  user    User     @relation("userNotifications", fields: [userId], references: [id], onDelete: Cascade)
+  creator User     @relation("notificationCreator", fields: [creatorId], references: [id], onDelete: Cascade)
+  post    Post?    @relation("postNotifications", fields: [postId], references: [id], onDelete: Cascade)
+  comment Comment? @relation("commentNotifications", fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt])
+}
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  FOLLOW
+}

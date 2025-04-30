@@ -45,7 +45,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Generate categories for the admin panel
 const categories = [
   {
     id: "cat-1",
@@ -136,36 +135,28 @@ export default function CategoriesPage() {
   const [isAddCategoryOpen, setIsAddCategoryOpen] = useState(false);
   const [editCategory, setEditCategory] = useState<
     (typeof categories)[0] | null
-  >(null);
+  >(null); //todo: Check types
   const [newCategory, setNewCategory] = useState({
     name: "",
     slug: "",
     description: "",
   });
 
-  // Filter categories based on search query
   const filteredCategories = categories.filter(
     (category) =>
       category.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       category.description.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Handle form submission for new category
   const handleAddCategory = () => {
-    console.log("Adding new category:", newCategory);
-    // In a real app, you would call an API here
     setIsAddCategoryOpen(false);
     setNewCategory({ name: "", slug: "", description: "" });
   };
 
-  // Handle form submission for edit category
   const handleEditCategory = () => {
-    console.log("Editing category:", editCategory);
-    // In a real app, you would call an API here
     setEditCategory(null);
   };
 
-  // Generate slug from name
   const generateSlug = (name: string) => {
     return name
       .toLowerCase()

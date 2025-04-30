@@ -26,16 +26,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { useMutation } from "@tanstack/react-query";
+import { createPosts } from "@/actions/post.action";
 
-// Define article structure
 interface Article {
-  id: string;
   title: string;
   slug: string;
   category: string;
@@ -44,7 +44,6 @@ interface Article {
   date: string;
   readTime: string;
   image: string;
-  author: string;
 }
 
 function CreateArticlePage() {
@@ -54,8 +53,7 @@ function CreateArticlePage() {
   const [category, setCategory] = useState("politics");
   const [excerpt, setExcerpt] = useState("");
   const [featuredImage, setFeaturedImage] = useState("");
-  const [author, setAuthor] = useState("");
-  // Font options
+
   const fonts = [
     { name: "Default", value: "inherit" },
     { name: "Arial", value: "Arial, sans-serif" },
@@ -65,7 +63,6 @@ function CreateArticlePage() {
     { name: "Courier New", value: "Courier New, monospace" },
   ];
 
-  // Color options
   const colors = [
     { name: "Default", value: "inherit" },
     { name: "Black", value: "#000000" },
@@ -76,23 +73,18 @@ function CreateArticlePage() {
     { name: "Purple", value: "#805ad5" },
   ];
 
-
-
-  // Format functions
   const formatText = (command: string, value = "") => {
     document.execCommand(command, false, value);
     editorRef.current?.focus();
   };
 
-  // Handle image upload
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = (event) => {
         if (event.target?.result) {
-          // Insert image at cursor position
-          const imgHtml = `<img src="${event.target.result}" alt="Uploaded image" style="max-width: 100%; margin: 10px 0;" />`;
+          const imgHtml = `<img src="${event.target.result}" alt="Uploaded image" style="display: block; margin: 10px auto; max-height: 400px; width: auto; object-fit: cover;" />`;
           document.execCommand("insertHTML", false, imgHtml);
         }
       };
@@ -100,7 +92,6 @@ function CreateArticlePage() {
     }
   };
 
-  // Handle featured image upload
   const handleFeaturedImageUpload = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
@@ -116,33 +107,40 @@ function CreateArticlePage() {
     }
   };
 
-  // Generate slug from title
   const generateSlug = (text: string) => {
     return text
       .toLowerCase()
-      .replace(/[^\w\s-]/g, "")
+      .replace(/[^\p{L}\p{N}\s-]/gu, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .trim();
   };
 
-  // Calculate read time (rough estimate)
   const calculateReadTime = (content: string) => {
     const wordCount = content.split(/\s+/).length;
-    const readingTimeMinutes = Math.ceil(wordCount / 200); // Assuming 200 words per minute
+    const readingTimeMinutes = Math.ceil(wordCount / 200);
     return `${readingTimeMinutes} min read`;
   };
 
-  // Handle form submission
+  const { mutate: createPost, isPending } = useMutation({
+    mutationFn: async (newArticle: Article) => await createPosts(newArticle),
+    onSuccess: (data) => {
+      if ("slug" in data) {
+        router.push(`/article/${data.slug}`);
+      } else {
+        console.error("Unexpected response structure:", data);
+      }
+    },
+    onError: (error) => {
+      console.error("Error Post Creaion:", error);
+    },
+  });
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!title || !editorRef.current?.innerHTML) {
       alert("Please add a title and content for your article");
       return;
     }
-
-    // Create article object
     const slug = generateSlug(title);
     const content = editorRef.current.innerHTML;
     const readTime = calculateReadTime(editorRef.current.textContent || "");
@@ -153,7 +151,6 @@ function CreateArticlePage() {
     });
 
     const newArticle: Article = {
-      id: Date.now().toString(),
       title,
       slug,
       category,
@@ -162,10 +159,9 @@ function CreateArticlePage() {
         excerpt || content.replace(/<[^>]*>/g, "").substring(0, 150) + "...",
       date,
       readTime,
-      image: featuredImage || "/placeholder.svg?height=800&width=1200",
-      author: author || "Anonymous",
+      image: featuredImage || "/placeholder.jpg?height=800&width=1200",
     };
-    console.log(newArticle);
+    createPost(newArticle);
   };
 
   return (
@@ -183,7 +179,7 @@ function CreateArticlePage() {
           <h1 className="text-xl font-bold">Create New Article</h1>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={(e) => handleSubmit(e)} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-6">
               <div>
@@ -216,153 +212,146 @@ function CreateArticlePage() {
 
               <div>
                 <Label className="text-base mb-1 block">Content</Label>
-                <Tabs
-                  className="w-full"
-                  defaultValue="edit"
-                >
+                <Tabs className="w-full" defaultValue="edit">
                   <div className="border rounded-lg">
                     <div className="bg-muted/40 p-2 flex items-center gap-1 flex-wrap border-b">
-           
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => formatText("bold")}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Bold className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => formatText("italic")}
-                            className="h-8 w-8 p-0"
-                          >
-                            <Italic className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => formatText("justifyLeft")}
-                            className="h-8 w-8 p-0"
-                          >
-                            <AlignLeft className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => formatText("justifyCenter")}
-                            className="h-8 w-8 p-0"
-                          >
-                            <AlignCenter className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => formatText("justifyRight")}
-                            className="h-8 w-8 p-0"
-                          >
-                            <AlignRight className="h-4 w-4" />
-                          </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => formatText("bold")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Bold className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => formatText("italic")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Italic className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => formatText("justifyLeft")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <AlignLeft className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => formatText("justifyCenter")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <AlignCenter className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => formatText("justifyRight")}
+                        className="h-8 w-8 p-0"
+                      >
+                        <AlignRight className="h-4 w-4" />
+                      </Button>
 
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 px-2"
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 px-2"
+                          >
+                            <Type className="h-4 w-4 mr-1" /> Font
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-56 p-2">
+                          <div className="space-y-2">
+                            <div>
+                              <Label className="text-xs">Font Family</Label>
+                              <Select
+                                onValueChange={(value) =>
+                                  formatText("fontName", value)
+                                }
                               >
-                                <Type className="h-4 w-4 mr-1" /> Font
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-56 p-2">
-                              <div className="space-y-2">
-                                <div>
-                                  <Label className="text-xs">Font Family</Label>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      formatText("fontName", value)
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select font" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {fonts.map((font) => (
-                                        <SelectItem
-                                          key={font.value}
-                                          value={font.value}
-                                        >
-                                          <span
-                                            style={{ fontFamily: font.value }}
-                                          >
-                                            {font.name}
-                                          </span>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                                <div>
-                                  <Label className="text-xs">Text Color</Label>
-                                  <Select
-                                    onValueChange={(value) =>
-                                      formatText("foreColor", value)
-                                    }
-                                  >
-                                    <SelectTrigger>
-                                      <SelectValue placeholder="Select color" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                      {colors.map((color) => (
-                                        <SelectItem
-                                          key={color.value}
-                                          value={color.value}
-                                        >
-                                          <div className="flex items-center">
-                                            <div
-                                              className="h-4 w-4 rounded-full mr-2 border"
-                                              style={{
-                                                backgroundColor: color.value,
-                                              }}
-                                            />
-                                            <span>{color.name}</span>
-                                          </div>
-                                        </SelectItem>
-                                      ))}
-                                    </SelectContent>
-                                  </Select>
-                                </div>
-                              </div>
-                            </PopoverContent>
-                          </Popover>
-
-                          <div className="relative">
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 px-2"
-                              onClick={() =>
-                                document.getElementById("image-upload")?.click()
-                              }
-                            >
-                              <ImageIcon className="h-4 w-4 mr-1" /> Add Image
-                            </Button>
-                            <input
-                              id="image-upload"
-                              type="file"
-                              accept="image/*"
-                              onChange={handleImageUpload}
-                              className="hidden"
-                            />
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select font" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {fonts.map((font) => (
+                                    <SelectItem
+                                      key={font.value}
+                                      value={font.value}
+                                    >
+                                      <span style={{ fontFamily: font.value }}>
+                                        {font.name}
+                                      </span>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
+                            <div>
+                              <Label className="text-xs">Text Color</Label>
+                              <Select
+                                onValueChange={(value) =>
+                                  formatText("foreColor", value)
+                                }
+                              >
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select color" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {colors.map((color) => (
+                                    <SelectItem
+                                      key={color.value}
+                                      value={color.value}
+                                    >
+                                      <div className="flex items-center">
+                                        <div
+                                          className="h-4 w-4 rounded-full mr-2 border"
+                                          style={{
+                                            backgroundColor: color.value,
+                                          }}
+                                        />
+                                        <span>{color.name}</span>
+                                      </div>
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
+                            </div>
                           </div>
-                      
+                        </PopoverContent>
+                      </Popover>
+
+                      <div className="relative">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="h-8 px-2"
+                          onClick={() =>
+                            document.getElementById("image-upload")?.click()
+                          }
+                        >
+                          <ImageIcon className="h-4 w-4 mr-1" /> Add Image
+                        </Button>
+                        <input
+                          id="image-upload"
+                          type="file"
+                          accept="image/*"
+                          onChange={handleImageUpload}
+                          className="hidden"
+                        />
+                      </div>
                     </div>
 
                     <TabsContent value="edit" className="mt-0">
@@ -373,7 +362,6 @@ function CreateArticlePage() {
                         data-placeholder="Start writing your article here..."
                       />
                     </TabsContent>
-
                   </div>
                 </Tabs>
               </div>
@@ -397,19 +385,6 @@ function CreateArticlePage() {
                     <SelectItem value="sports">Sports</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-
-              <div>
-                <Label htmlFor="author" className="text-base">
-                  Author Name
-                </Label>
-                <Input
-                  id="author"
-                  value={author}
-                  onChange={(e) => setAuthor(e.target.value)}
-                  placeholder="Your name"
-                  className="mt-1"
-                />
               </div>
 
               <div>
@@ -464,7 +439,8 @@ function CreateArticlePage() {
 
               <div className="flex gap-4 mt-6">
                 <Button type="submit" className="flex-1 gap-1">
-                  <Save className="h-4 w-4" /> Publish Article
+                  <Save className="h-4 w-4" />{" "}
+                  {isPending ? "Publishing..." : "Publish"}
                 </Button>
               </div>
             </div>

@@ -1,16 +1,26 @@
+"use client";
+
+
 import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { CalendarDays, ChevronRight, Clock, Heart, MessageSquare } from "lucide-react";
+import {
+  CalendarDays,
+  ChevronRight,
+  Clock,
+  Heart,
+  MessageSquare,
+} from "lucide-react";
 import { Separator } from "@radix-ui/react-separator";
-import  Link  from 'next/link';
-import { use } from "react";
+import Link from "next/link";
+import { use, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Post } from "@/types";
+import { formatPostDate } from "@/lib/date_modify";
 
 const getCategoryData = (slug: string) => {
-  // Capitalize the first letter of the slug for display
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
 
-  // Featured article data
   const featuredArticle = {
     title: `Major Developments in ${categoryName} Sector Signal Changing Landscape`,
     description:
@@ -22,20 +32,37 @@ const getCategoryData = (slug: string) => {
     commentCount: 32,
   };
 
-  // Article list data
-  const articles = Array.from({ length: 5 }, (_, i) => ({
+  const { data: articles, isLoading: isLoadingPosts } = useQuery<Post[] | null>(
+    {
+      queryKey: ["getLatest"],
+      queryFn: async () => {
+        try {
+          const res = await fetch(`/api/article`);
+          if (!res.ok) throw new Error("Network response was not ok");
+          return res.json();
+        } catch (error) {
+          console.error("Error fetching user stats:", error);
+          return [];
+        }
+      },
+    }
+  );
+
+  const dummyAticle = Array.from({ length: 5 }, (_, i) => ({
     id: i + 1,
-    title: `${categoryName} Experts Weigh In On Latest Developments in the Field`,
-    description:
-      "A panel of industry leaders gathered to discuss the implications of recent changes and what they mean for the future of the sector. The consensus points to a period of rapid innovation and adaptation.",
-    date: `June ${12 - i}, 2023`,
-    readTime: "4 min read",
-    image: `/placeholder.jpg?height=400&width=600&text=Article ${i + 1}`,
-    likeCount: 128,
-    commentCount: 32,
+    title: `Key Insights from the Latest ${categoryName} Conference`,
+    createdAt: new Date(),
+    readTime: "5 min read",
+    excerpt:
+      "Recent events have led to significant shifts in how experts view the future of this industry, with new players emerging and established entities adapting to changing conditions.",
+    slug: `key-insights-from-the-latest-${categoryName}-conference`,
+    image: `/placeholder.jpg?height=100&width=100&text=${i + 1}`,
+    _count: {
+      likes: 10,
+      comments: 20,
+    },
   }));
 
-  // Popular articles data
   const popularArticles = Array.from({ length: 5 }, (_, i) => ({
     id: i + 1,
     title: `Key Insights from the Latest ${categoryName} Conference`,
@@ -45,7 +72,6 @@ const getCategoryData = (slug: string) => {
     commentCount: 32,
   }));
 
-  // Related categories data
   const relatedCategories = [
     { name: "Politics", count: 24 },
     { name: "Technology", count: 18 },
@@ -58,15 +84,14 @@ const getCategoryData = (slug: string) => {
     categoryName,
     description: `Browse the latest news and articles from our ${categoryName} section.`,
     featuredArticle,
-    articles,
+    articles: isLoadingPosts ? dummyAticle : articles,
     popularArticles,
     relatedCategories,
   };
 };
 
 function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
-
-  const {catg} = use(params);
+  const { catg } = use(params);
   const {
     categoryName,
     description,
@@ -75,11 +100,10 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
     popularArticles,
     relatedCategories,
   } = getCategoryData(catg);
+
   return (
-    <div>
-      <h1>Category Overview</h1>
-      <main className="flex-1">
-        <div className=" px-4 py-8">
+    <div className="w-full min-h-screen  container mx-10">
+        <div className="p-4">
           <div className="mb-8">
             <div className="mb-2">
               <Link href="/" className="text-sm text-primary hover:underline">
@@ -149,7 +173,7 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
                 <Separator />
 
                 {/* Article List */}
-                {articles.map((article) => (
+                {articles?.map((article) => (
                   <div
                     key={article.id}
                     className="grid grid-cols-1 md:grid-cols-3 gap-6"
@@ -170,13 +194,13 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
                         {article.title}
                       </h2>
                       <p className="text-muted-foreground mb-4 line-clamp-3">
-                        {article.description}
+                        {article.excerpt}
                       </p>
                       <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                         <div className="flex items-center gap-4">
                           <div className="flex items-center gap-1">
                             <CalendarDays className="h-4 w-4" />
-                            <span>{article.date}</span>
+                            <span>{formatPostDate(article.createdAt)}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <Clock className="h-4 w-4" />
@@ -186,19 +210,19 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
                         <div className="flex items-center gap-3">
                           <div className="flex items-center gap-1">
                             <Heart className="h-4 w-4" />
-                            <span>{article.likeCount}</span>
+                            <span>{article._count.likes}</span>
                           </div>
                           <div className="flex items-center gap-1">
                             <MessageSquare className="h-4 w-4" />
-                            <span>{article.commentCount}</span>
+                            <span>{article._count.comments}</span>
                           </div>
                         </div>
                       </div>
-                      
-                      <Link href={`/article/${article.id}`}>
-                      <Button variant="outline" size="sm" >
-                        Read Article
-                      </Button>
+
+                      <Link href={`/article/${article.slug}`}>
+                        <Button variant="outline" size="sm">
+                          Read Article
+                        </Button>
                       </Link>
                     </div>
                   </div>
@@ -247,7 +271,6 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
                               <span>{article.commentCount}</span>
                             </div>
                           </div>
-          
                         </div>
                       </div>
                     ))}
@@ -287,7 +310,6 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
             </div>
           </div>
         </div>
-      </main>
     </div>
   );
 }

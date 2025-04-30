@@ -52,53 +52,10 @@ import {
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 
-// Import dummy data
-import { currentUser, followers, following } from "@/lib/dummy";
-
-// Define a unified type for users
-type User = {
-  id: string;
-  name: string;
-  username: string;
-  email: string;
-  bio: string;
-  avatar: string;
-  joinDate: string;
-  role: string;
-  status: string;
-};
-
-// Combine all users for the admin panel
-const allUsers: User[] = [
-  {
-    ...currentUser,
-    joinDate: "January 2023",
-    role: "Admin",
-    status: "Active",
-  },
-  ...followers.map((f) => ({
-    id: f.id,
-    name: f.name,
-    username: f.username,
-    email: `${f.username}@example.com`,
-    bio: f.bio,
-    avatar: f.avatar,
-    joinDate: "March 2023",
-    role: "Author",
-    status: "Active",
-  })),
-  ...following.map((f) => ({
-    id: f.id,
-    name: f.name,
-    username: f.username,
-    email: `${f.username}@example.com`,
-    bio: f.bio,
-    avatar: f.avatar,
-    joinDate: "April 2023",
-    role: "Reader",
-    status: "Active",
-  })),
-];
+import { getAllUsers } from "@/actions/admin.action";
+import { useQuery } from "@tanstack/react-query";
+import { formatJoinedDate } from "@/lib/date_modify";
+import { LoadingPage } from "@/components/ui/loading";
 
 function UsersPage() {
   const [searchQuery, setSearchQuery] = useState("");
@@ -106,20 +63,24 @@ function UsersPage() {
   const [selectedStatus, setSelectedStatus] = useState("all");
   const [isAddUserOpen, setIsAddUserOpen] = useState(false);
 
-  // Filter users based on search query and filters
-  const filteredUsers = allUsers.filter((user) => {
-    const matchesSearch =
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesRole = selectedRole === "all" || user.role === selectedRole;
-    const matchesStatus =
-      selectedStatus === "all" || user.status === selectedStatus;
-
-    return matchesSearch && matchesRole && matchesStatus;
+  const { data: allUsers, isLoading: user_isLoading } = useQuery({
+    queryKey: ["all_Users"],
+    queryFn: () => getAllUsers(),
   });
 
+  const filteredUsers =
+    allUsers?.filter((user) => {
+      const matchesSearch =
+        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.email.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesRole = selectedRole === "all" || user.role === selectedRole;
+
+      return matchesSearch && matchesRole;
+    }) || [];
+
+  if (user_isLoading) return <LoadingPage />;
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -321,7 +282,10 @@ function UsersPage() {
                   <TableCell>
                     <div className="flex items-center gap-3">
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatar} alt={user.name} />
+                        <AvatarImage
+                          src={user.avatar || "user.png"}
+                          alt={user.name}
+                        />
                         <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                       </Avatar>
                       <div>
@@ -337,25 +301,13 @@ function UsersPage() {
                   </TableCell>
                   <TableCell>
                     <Badge
-                      variant={
-                        user.status === "Active"
-                          ? "default"
-                          : user.status === "Suspended"
-                          ? "destructive"
-                          : "secondary"
-                      }
-                      className={
-                        user.status === "Active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
-                          : user.status === "Suspended"
-                          ? "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300"
-                          : "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
-                      }
+                      variant={"default"}
+                      className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300"
                     >
-                      {user.status}
+                      Active
                     </Badge>
                   </TableCell>
-                  <TableCell>{user.joinDate}</TableCell>
+                  <TableCell>{formatJoinedDate(user.createdAt)}</TableCell>
                   <TableCell className="text-right">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -370,7 +322,7 @@ function UsersPage() {
                           <Pencil className="h-4 w-4" /> Edit
                         </DropdownMenuItem>
                         <DropdownMenuItem className="gap-2">
-                          {user.status === "Active" ? (
+                          {true ? (
                             <>
                               <X className="h-4 w-4" /> Suspend
                             </>

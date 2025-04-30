@@ -20,66 +20,47 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { popularArticles } from "@/lib/dummy";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatPostDate } from "@/lib/date_modify";
+import { createComment, likePost } from "@/actions/post.action";
+import { LoadingPage } from "@/components/ui/loading";
 
-// Import dummy data
-import {
-  getArticleBySlug,
-  getCommentsBySlug,
-  getRelatedArticlesBySlug,
-  popularArticles,
-  type Article,
-  type Comment,
-} from "@/lib/dummy";
+interface commenetShape {
+  content: string;
+  createdAt: Date;
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    username: string;
+    avatar: string;
+  };
+}
 
 function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const router = useRouter();
-  const commentInputRef = useRef<HTMLTextAreaElement>(null);
-  const [article, setArticle] = useState<Article | null>(null);
+  const queryClient = useQueryClient();
+  const commentInputRef = useRef<HTMLTextAreaElement>(null); //todo:check this
   const [relatedArticles, setRelatedArticles] = useState<any[]>([]);
-  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [isLoading, setIsLoading] = useState(true);
-  const [likeCount, setLikeCount] = useState(0);
   const [tags, setTags] = useState<string[]>([]);
+  const { slug } = use(params); //todo:check this
 
-  const { slug } = use(params);
-
-  useEffect(() => {
-    // Load article data from dummy data
-    const loadArticleData = () => {
+  const { data: article, isLoading } = useQuery<Record<string, any> | null>({
+    queryKey: ["getPOST", slug],
+    queryFn: async () => {
       try {
-        const currentArticle = getArticleBySlug(slug);
-
-        if (!currentArticle) {
-          router.push("/");
-          return;
-        }
-
-        setArticle(currentArticle);
-        setLikeCount(currentArticle.likeCount);
-
-        // Set tags based on category
-        setTags([currentArticle.category, "Featured"]);
-
-        // Get comments for this article
-        const articleComments = getCommentsBySlug(slug);
-        setComments(articleComments);
-
-        // Get related articles
-        const related = getRelatedArticlesBySlug(slug);
-        setRelatedArticles(related);
-
-        setIsLoading(false);
+        const res = await fetch(`/api/article/${slug}`);
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
       } catch (error) {
-        console.error("Error loading article data:", error);
-        router.push("/");
+        console.error("Error fetching user stats:", error);
+        return null;
       }
-    };
+    },
+  });
 
-    loadArticleData();
-  }, [slug, router]);
-
-  // Make images responsive
   useEffect(() => {
     const makeImagesResponsive = () => {
       const articleImages = document.querySelectorAll(".prose img");
@@ -92,47 +73,31 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
     makeImagesResponsive();
   }, [article]);
 
-  // Simple function to increment likes
-  const handleLike = () => {
-    // Just increment the like count in the UI
-    setLikeCount((prevCount) => prevCount + 1);
-    console.log("Liked article:", article?.title);
-  };
-
-  // Simple function to add comments
-  const handleAddComment = () => {
-    if (!newComment.trim()) return;
-
-    // Log the comment data
-    console.log("Adding new comment:", newComment);
-
-    // Create a new comment object
-    const newCommentObj: Comment = {
-      id: Date.now().toString(),
-      articleId: slug,
-      author: "You",
-      content: newComment,
-      date: new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "long",
-        day: "numeric",
-      }),
-      avatar: "/placeholder.jpg?height=40&width=40&text=You",
-    };
-
-    // Add the new comment to the comments array
-    setComments((prevComments) => [newCommentObj, ...prevComments]);
-    setNewComment("");
-  };
+  const { mutate: likesPost, isPending: likesLoading } = useMutation({
+    mutationFn: async (postId: string) => {
+      const res = await likePost(postId);
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getPOST"] });
+    },
+  });
+  const { mutate: commentsPost, isPending: commentsLoading } = useMutation({
+    mutationFn: async () => {
+      if (!newComment.trim() && !article?.id) return;
+      const res = await createComment(article?.id, newComment);
+      return res;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getPOST"] });
+      setNewComment("");
+    },
+  });
 
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col">
-        <main className="flex-1 container mx-auto px-4 py-8 flex items-center justify-center">
-          <div className="text-center">
-            <div className="animate-pulse">Loading article...</div>
-          </div>
-        </main>
+        <LoadingPage />
       </div>
     );
   }
@@ -152,7 +117,6 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
       </div>
     );
   }
-
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <main className="flex-1">
@@ -165,7 +129,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                 </Link>{" "}
                 /{" "}
                 <Link
-                  href={`/category/${article.category.toLowerCase()}`}
+                  href={`/category/${article?.category.toLowerCase()}`}
                   className="text-sm text-primary hover:underline"
                 >
                   {article.category.charAt(0).toUpperCase() +
@@ -181,22 +145,22 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
               <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <CalendarDays className="h-4 w-4" />
-                  <span>{article.date}</span>
+                  <span>{formatPostDate(article.createdAt)}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Clock className="h-4 w-4" />
                   <span>{article.readTime}</span>
                 </div>
                 <div className="text-sm">
-                  By <span className="font-medium">{article.author}</span>
+                  By <span className="font-medium">{article.author.name}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <Heart className="h-4 w-4" />
-                  <span>{likeCount}</span>
+                  <span>{article._count.likes}</span>
                 </div>
                 <div className="flex items-center gap-1">
                   <MessageSquare className="h-4 w-4" />
-                  <span>{comments.length}</span>
+                  <span>{article._count.comments}</span>
                 </div>
               </div>
 
@@ -222,11 +186,18 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={handleLike}
-                    className="gap-2"
+                    onClick={() => likesPost(article.id)}
+                    className={`gap-2 ${
+                      article.isLiked ? "text-pink-600" : "text-primary"
+                    }`}
                   >
-                    <Heart className="h-4 w-4" />
-                    Like ({likeCount})
+                    <Heart
+                      className={`h-4 w-4 ${
+                        article.isLiked ? "fill-pink-600" : ""
+                      }`}
+                    />
+                    {!likesLoading && article.isLiked ? "Liked" : "Like"} (
+                    {article._count.likes}){likesLoading && "..."}
                   </Button>
                   <Button
                     variant="outline"
@@ -235,7 +206,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                     className="gap-2"
                   >
                     <MessageSquare className="h-4 w-4" />
-                    Comment ({comments.length})
+                    Comment ({article._count.comments})
                   </Button>
                 </div>
                 <div className="flex items-center gap-2">
@@ -252,7 +223,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                 </div>
               </div>
 
-              <Separator className="my-8" />
+              <Separator className="my-4" />
 
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex flex-wrap gap-2">
@@ -264,12 +235,12 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                 </div>
               </div>
 
-              <Separator className="my-8" />
+              
 
               {/* Comments Section */}
               <div className="mb-8">
                 <h2 className="text-2xl font-bold mb-6">
-                  Comments ({comments.length})
+                  Comments ({article?._count.comments})
                 </h2>
 
                 {/* Add Comment Form */}
@@ -283,37 +254,49 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                     rows={3}
                   />
                   <Button
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim()}
+                    onClick={() => {
+                      if (newComment.trim()) {
+                        commentsPost();
+                      } else {
+                        alert("Please enter a comment.");
+                      }
+                    }}
                     className="gap-2"
                   >
                     <Send className="h-4 w-4" />
-                    Post Comment
+                    {commentsLoading ? "Posting..." : "Post Comment"}
                   </Button>
                 </div>
 
                 {/* Comments List */}
                 <div className="space-y-6">
-                  {comments.length > 0 ? (
-                    comments.map((comment) => (
+                  {article?._count.comments > 0 ? (
+                    article?.comments.map((comment: commenetShape) => (
                       <div key={comment.id} className="flex gap-4">
                         <Avatar className="h-10 w-10">
                           <AvatarImage
-                            src={comment.avatar}
-                            alt={comment.author}
+                            src={comment.user.avatar}
+                            alt={comment.user.id}
                           />
-                          <AvatarFallback>
-                            {comment.author.charAt(0)}
-                          </AvatarFallback>
+                          <AvatarFallback>{"Unknown User"}</AvatarFallback>
                         </Avatar>
                         <div className="flex-1">
                           <div className="flex items-center justify-between">
-                            <h4 className="font-medium">{comment.author}</h4>
+                            <div>
+                              <h4 className="font-medium">
+                                {comment.user.name}
+                              </h4>
+                              <h4 className="font-light">
+                                @{comment.user.username}
+                              </h4>
+                            </div>
                             <span className="text-xs text-muted-foreground">
-                              {comment.date}
+                              {formatPostDate(comment.createdAt)}
                             </span>
                           </div>
-                          <p className="mt-1 text-sm">{comment.content}</p>
+                          <p className="mt-1 font-medium text-md px-5">
+                            {comment.content}
+                          </p>
                         </div>
                       </div>
                     ))

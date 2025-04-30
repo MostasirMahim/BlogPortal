@@ -1,3 +1,6 @@
+"use client";
+
+
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -11,29 +14,31 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useQuery } from "@tanstack/react-query";
+import { formatJoinedDate } from "@/lib/date_modify";
+import { useRouter } from "next/navigation";
+import { Post } from "@/types";
+import { LoadingPage } from "./ui/loading";
 
-// This function would be replaced with a real data fetching function in the future
 const getHomePageData = () => {
-  // Featured news data
   const featuredNews = {
     title: "Global Summit Addresses Climate Change with New Initiatives",
     category: "Breaking News",
     date: "June 12, 2023",
     readTime: "5 min read",
-    image: "/placeholder.jpg?height=800&width=1200",
+    image:
+      "https://www.carbonbrief.org/wp-content/uploads/2023/12/53395277155_1f62b0c011_k-1550x804.jpg",
     slug: "global-summit-climate-change",
     likeCount: 42,
     commentCount: 17,
     id: "featured-1",
   };
-
-  // Secondary news data
   const secondaryNews = [
     {
       id: "secondary-1",
       title: "New AI Breakthrough Promises to Transform Healthcare",
       category: "Technology",
-      image: "/placeholder.jpg?height=400&width=600",
+      image:"/placeholder.jpg",
       slug: "ai-breakthrough-healthcare",
       date: "June 11, 2023",
       likeCount: 76,
@@ -43,7 +48,8 @@ const getHomePageData = () => {
       id: "secondary-2",
       title: "Stock Markets Reach Record Highs Amid Economic Recovery",
       category: "Business",
-      image: "/placeholder.jpg?height=400&width=600",
+      image:
+        "https://plus.unsplash.com/premium_photo-1681487769650-a0c3fbaed85a",
       slug: "stock-markets-record-highs",
       date: "June 10, 2023",
       likeCount: 54,
@@ -51,7 +57,6 @@ const getHomePageData = () => {
     },
   ];
 
-  // Latest news data
   const latestNews = [
     {
       id: "latest-1",
@@ -75,7 +80,7 @@ const getHomePageData = () => {
         "The breakthrough research shows promising results in early clinical trials, offering hope to millions affected by the condition.",
       date: "June 9, 2023",
       readTime: "4 min read",
-      image: "/placeholder.jpg?height=400&width=600&text=News 2",
+      image: "https://images.unsplash.com/photo-1454165804606-c3d57bc86b40",
       slug: "alzheimers-treatment-discovery",
       likeCount: 62,
       commentCount: 15,
@@ -88,7 +93,7 @@ const getHomePageData = () => {
         "The new devices feature cutting-edge technology that could reshape how consumers interact with digital content.",
       date: "June 8, 2023",
       readTime: "3 min read",
-      image: "/placeholder.jpg?height=400&width=600&text=News 3",
+      image: "https://images.unsplash.com/photo-1569025690938-a00729c9e1f9",
       slug: "tech-company-product-line",
       likeCount: 78,
       commentCount: 23,
@@ -108,8 +113,6 @@ const getHomePageData = () => {
     },
   ];
 
-  // Category tabs data
-  // Category tabs data
   const categoryTabs = {
     trending: [
       {
@@ -352,7 +355,6 @@ const getHomePageData = () => {
     ],
   };
 
-  // Featured videos data
   const featuredVideos = [
     {
       id: 1,
@@ -389,7 +391,6 @@ const getHomePageData = () => {
     },
   ];
 
-  // Trending now data
   const trendingNow = [
     {
       id: 1,
@@ -442,11 +443,33 @@ function HomePage() {
   const {
     featuredNews,
     secondaryNews,
-    latestNews,
     categoryTabs,
     featuredVideos,
     trendingNow,
   } = getHomePageData();
+
+  const router = useRouter();
+
+  const { data: POSTS, isLoading: isLoadingPosts } = useQuery<Post[] | null>({
+    queryKey: ["getLatest"],
+    queryFn: async () => {
+      try {
+        const res = await fetch(`/api/article`);
+        if (!res.ok) throw new Error("Network response was not ok");
+        return res.json();
+      } catch (error) {
+        console.error("Error fetching user stats:", error);
+        return [];
+      }
+    },
+  });
+
+  if (isLoadingPosts)
+    return (
+      <div className="h-screen flex items-center justify-center">
+        <LoadingPage />
+      </div>
+    );
 
   return (
     <div className="min-h-screen flex flex-col overflow-x-hidden">
@@ -508,6 +531,7 @@ function HomePage() {
                     <Image
                       src={news.image || "/placeholder.jpg"}
                       alt={news.title}
+                     
                       fill
                       className="object-cover"
                     />
@@ -552,17 +576,18 @@ function HomePage() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {latestNews.map((news) => (
+            {POSTS?.map((news) => (
               <Card
                 key={news.id}
-                className="overflow-hidden border-0 shadow-sm"
+                className="overflow-hidden border-0 shadow-sm cursor-pointer hover:shadow-lg transition-shadow duration-300 ease-in-out"
+                onClick={() => router.push(`/article/${news.slug}`)}
               >
                 <div className="relative h-[200px] w-full">
                   <Image
                     src={news.image || "/placeholder.jpg"}
                     alt={news.title}
                     fill
-                    className="object-cover"
+                    className="object-cover w-full h-full"
                   />
                 </div>
                 <CardContent className="p-4">
@@ -570,36 +595,29 @@ function HomePage() {
                     {news.category}
                   </div>
                   <h3 className="font-bold mb-2 line-clamp-2">
-                    <Link
-                      href={`/article/${news.slug}`}
-                      className="hover:text-primary transition-colors"
-                    >
+                    <p className="hover:text-primary transition-colors">
                       {news.title}
-                    </Link>
+                    </p>
                   </h3>
                   <p className="text-sm text-muted-foreground line-clamp-2">
-                    {news.description}
+                    {news.excerpt}
                   </p>
                 </CardContent>
                 <CardFooter className="px-4 pb-4 pt-0 flex items-center justify-between text-xs text-muted-foreground">
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                       <CalendarDays className="h-3 w-3" />
-                      <span>{news.date}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Clock className="h-3 w-3" />
-                      <span>{news.readTime}</span>
+                      <span>{formatJoinedDate(news.createdAt)}</span>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
                     <div className="flex items-center gap-1">
                       <Heart className="h-3 w-3" />
-                      <span>{news.likeCount}</span>
+                      <span>{news._count.likes}</span>
                     </div>
                     <div className="flex items-center gap-1">
                       <MessageSquare className="h-3 w-3" />
-                      <span>{news.commentCount}</span>
+                      <span>{news._count.comments}</span>
                     </div>
                   </div>
                 </CardFooter>
@@ -638,12 +656,9 @@ function HomePage() {
                       </div>
                       <div>
                         <h3 className="font-medium line-clamp-2 text-sm">
-                          <Link
-                            href={`/article/${article.slug}`}
-                            className="hover:text-primary transition-colors"
-                          >
+                          <p className="hover:text-primary transition-colors">
                             {article.title}
-                          </Link>
+                          </p>
                         </h3>
                         <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                           <div className="flex items-center">
@@ -709,12 +724,9 @@ function HomePage() {
                 </div>
                 <CardContent className="p-4">
                   <h3 className="font-bold mb-2">
-                    <Link
-                      href={`/article/${video.slug}`}
-                      className="hover:text-primary transition-colors"
-                    >
+                    <p className="hover:text-primary transition-colors">
                       {video.title}
-                    </Link>
+                    </p>
                   </h3>
                   <p className="text-sm text-muted-foreground">
                     {video.description}
@@ -745,12 +757,9 @@ function HomePage() {
                   0{index + 1}
                 </div>
                 <h3 className="font-bold">
-                  <Link
-                    href={`/article/${item.slug}`}
-                    className="hover:text-primary transition-colors"
-                  >
+                  <p className="hover:text-primary transition-colors">
                     {item.title}
-                  </Link>
+                  </p>
                 </h3>
                 <div className="flex items-center gap-3 text-xs text-muted-foreground">
                   <div className="flex items-center">

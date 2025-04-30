@@ -10,7 +10,7 @@ export default function ModeToggle() {
   return (
     <Button
       variant="outline"
-      className="h-10 w-10 md:h-12 md:w-12"
+      className="h-10 w-10"
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
     >
       <SunIcon className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />

@@ -50,7 +50,6 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Generate some pending posts for the admin panel
 const pendingPosts = Array.from({ length: 10 }, (_, i) => ({
   id: `pending-${i + 1}`,
   title: [
@@ -88,14 +87,12 @@ export default function PendingPostsPage() {
   const [feedback, setFeedback] = useState("");
   const [currentAction, setCurrentAction] = useState<
     "approve" | "reject" | null
-  >(null);
+  >(null); //todo: check this types
 
-  // Get unique categories
   const categories = Array.from(
     new Set(pendingPosts.map((post) => post.category))
-  );
+  ); //todo: practice this
 
-  // Filter posts based on search query and filters
   const filteredPosts = pendingPosts.filter((post) => {
     const matchesSearch =
       post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -108,9 +105,8 @@ export default function PendingPostsPage() {
     return matchesSearch && matchesCategory;
   });
 
-  // Handle post approval or rejection
   const handlePostAction = (
-    post: (typeof pendingPosts)[0],
+    post: (typeof pendingPosts)[0], //todo:check this type
     action: "approve" | "reject"
   ) => {
     setViewPost(post);
@@ -118,16 +114,11 @@ export default function PendingPostsPage() {
     setFeedbackDialogOpen(true);
   };
 
-  // Submit feedback and complete action
   const submitFeedback = () => {
     console.log(
       `Post ${currentAction === "approve" ? "approved" : "rejected"}:`,
       viewPost?.id
     );
-    console.log("Feedback:", feedback);
-
-    // In a real app, you would call an API here
-
     setFeedbackDialogOpen(false);
     setFeedback("");
     setCurrentAction(null);
@@ -144,7 +135,6 @@ export default function PendingPostsPage() {
         </div>
       </div>
 
-      {/* Filters and Search */}
       <div className="flex flex-col sm:flex-row gap-4">
         <div className="flex-1 flex gap-2">
           <div className="relative flex-1">
@@ -199,7 +189,6 @@ export default function PendingPostsPage() {
         </div>
       </div>
 
-      {/* Pending Posts Table */}
       <div className="rounded-md border">
         <Table>
           <TableHeader>
