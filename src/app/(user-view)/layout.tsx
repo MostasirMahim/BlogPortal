@@ -5,6 +5,7 @@ import Navbar from "@/components/navbar/Navbar";
 import Footer from "@/components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 import Providers from "../providers";
+import { Toaster } from "@/components/ui/toaster";
 
 export const metadata: Metadata = {
   title: "Daily Gen-G",
@@ -27,7 +28,7 @@ export default function UserLayout({
             disableTransitionOnChange
           >
             <Providers>
-              <section className="flex flex-col min-h-screen items-center justify-start bg-gray-200 dark:bg-gray-900">
+              <section className="flex flex-col min-h-screen items-center justify-start  bg-gray-200 dark:bg-gray-900">
                 <div className="container mx-auto md:w-[80%] md:border-x-2 border-black dark:border-white bg-white dark:bg-black">
                   <header className="sticky top-0 z-50 ">
                     <Navbar />
@@ -39,6 +40,7 @@ export default function UserLayout({
                     <Footer />
                   </footer>
                 </div>
+                <Toaster />
               </section>
             </Providers>
           </ThemeProvider>

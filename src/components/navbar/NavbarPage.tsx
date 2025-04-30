@@ -105,8 +105,8 @@ function NavbarPage() {
 
   if (isLoading) return null;
   return (
-    <div className="max-w-full bg-white dark:bg-black mx-[1px] border-b md:border-b-2 border-black dark:border-white">
-      <header className="flex justify-between items-center px-6 gap-5 ">
+    <div className="max-w-full  bg-white dark:bg-black mx-[1px] border-b md:border-b-2 border-black dark:border-white">
+      <header className="flex justify-between items-center px-6 gap-5 mt-1">
         <img
           onClick={() => router.push("/")}
           src="/assets/daily.png"

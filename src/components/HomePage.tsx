@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
 import {
   CalendarDays,
@@ -18,6 +17,7 @@ import { formatJoinedDate } from "@/lib/date_modify";
 import { useRouter } from "next/navigation";
 import { Post } from "@/types";
 import { LoadingPage } from "./ui/loading";
+import { useToast } from "@/hooks/use-toast";
 
 const getHomePageData = () => {
   const featuredNews = {
@@ -448,7 +448,7 @@ function HomePage() {
   } = getHomePageData();
 
   const router = useRouter();
-
+  const { toast } = useToast();
   const { data: POSTS, isLoading: isLoadingPosts } = useQuery<Post[] | null>({
     queryKey: ["getLatest"],
     queryFn: async () => {
@@ -491,12 +491,17 @@ function HomePage() {
                     {featuredNews.category}
                   </div>
                   <h1 className="text-2xl md:text-3xl font-bold mb-2">
-                    <Link
-                      href={`/article/${featuredNews.slug}`}
+                    <p
                       className="hover:underline"
+                      onClick={() => {
+                        toast({
+                          title: "Its a Dummy Article",
+                          description: "Currently It's Use For Showcase",
+                        })
+                       }}
                     >
                       {featuredNews.title}
-                    </Link>
+                    </p>
                   </h1>
                   <div className="flex items-center text-sm gap-4">
                     <div className="flex items-center gap-1">
@@ -539,12 +544,17 @@ function HomePage() {
                         {news.category}
                       </div>
                       <h2 className="text-lg font-bold">
-                        <Link
-                          href={`/article/${news.slug}`}
+                        <p
+                          onClick={() => {
+                            toast({
+                              title: "Its a Dummy Article",
+                              description: "Currently It's Use For Showcase",
+                            })
+                           }}
                           className="hover:underline"
                         >
                           {news.title}
-                        </Link>
+                        </p>
                       </h2>
                       <div className="flex items-center gap-3 mt-2 text-xs">
                         <div className="flex items-center gap-1">

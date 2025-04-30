@@ -170,7 +170,10 @@ function AdminDashboard({ children }: { children: React.ReactNode }) {
               <DropdownMenuLabel>My Account</DropdownMenuLabel>
               <DropdownMenuSeparator />
               <DropdownMenuItem>
-                <Link href="/profile" className="flex w-full">
+                <Link
+                  href={`/profile/${USER?.username}`}
+                  className="flex w-full"
+                >
                   Profile
                 </Link>
               </DropdownMenuItem>

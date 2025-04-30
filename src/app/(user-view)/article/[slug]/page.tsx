@@ -25,6 +25,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatPostDate } from "@/lib/date_modify";
 import { createComment, likePost } from "@/actions/post.action";
 import { LoadingPage } from "@/components/ui/loading";
+import { useToast } from "@/hooks/use-toast";
 
 interface commenetShape {
   content: string;
@@ -46,6 +47,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const [newComment, setNewComment] = useState("");
   const [tags, setTags] = useState<string[]>([]);
   const { slug } = use(params); //todo:check this
+  const { toast } = useToast();
 
   const { data: article, isLoading } = useQuery<Record<string, any> | null>({
     queryKey: ["getPOST", slug],
@@ -80,6 +82,10 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getPOST"] });
+      toast({
+        title: "Article Liked ❤️",
+        description: "Article Liked Successfully",
+      });
     },
   });
   const { mutate: commentsPost, isPending: commentsLoading } = useMutation({
@@ -91,6 +97,10 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getPOST"] });
       setNewComment("");
+      toast({
+        title: "Comment Added ✍️",
+        description: "Comment Added Successfully",
+      });
     },
   });
 
@@ -129,7 +139,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                 </Link>{" "}
                 /{" "}
                 <Link
-                  href={`/category/${article?.category.toLowerCase()}`}
+                  href={`/site/${article?.category.toLowerCase()}`}
                   className="text-sm text-primary hover:underline"
                 >
                   {article.category.charAt(0).toUpperCase() +
@@ -325,12 +335,17 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                     </div>
                     <CardContent className="p-4">
                       <h3 className="font-bold mb-2">
-                        <Link
-                          href={`/article/${article.slug}`}
+                        <p
+                          onClick={() => {
+                            toast({
+                              title: "Its a Dummy Article",
+                              description: "Currently It's Use For Showcase",
+                            });
+                          }}
                           className="hover:text-primary transition-colors"
                         >
                           {article.title}
-                        </Link>
+                        </p>
                       </h3>
                       <p className="text-sm text-muted-foreground line-clamp-2">
                         {article.description || article.excerpt}
@@ -374,12 +389,18 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                         </div>
                         <div>
                           <h4 className="font-medium text-sm line-clamp-2">
-                            <Link
-                              href={`/article/${article.slug}`}
+                            <p
+                              onClick={() => {
+                                toast({
+                                  title: "Its a Dummy Article",
+                                  description:
+                                    "Currently It's Use For Showcase",
+                                });
+                              }}
                               className="hover:text-primary transition-colors"
                             >
                               {article.title}
-                            </Link>
+                            </p>
                           </h4>
                           <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
                             <div className="flex items-center">
@@ -423,7 +444,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                   <h3 className="text-lg font-bold mb-4">Categories</h3>
                   <div className="space-y-2">
                     <Link
-                      href="/category/politics"
+                      href="/site/politics"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Politics</span>
@@ -432,7 +453,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                       </span>
                     </Link>
                     <Link
-                      href="/category/technology"
+                      href="/site/technology"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Technology</span>
@@ -441,7 +462,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                       </span>
                     </Link>
                     <Link
-                      href="/category/business"
+                      href="/site/business"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Business</span>
@@ -450,7 +471,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                       </span>
                     </Link>
                     <Link
-                      href="/category/health"
+                      href="/site/health"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Health</span>
@@ -459,7 +480,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                       </span>
                     </Link>
                     <Link
-                      href="/category/entertainment"
+                      href="/site/entertainment"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Entertainment</span>
@@ -468,7 +489,7 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                       </span>
                     </Link>
                     <Link
-                      href="/category/sports"
+                      href="/site/sports"
                       className="flex justify-between items-center text-sm hover:text-primary"
                     >
                       <span>Sports</span>
