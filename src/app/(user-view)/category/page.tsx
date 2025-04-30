@@ -28,7 +28,7 @@ import {
 import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { useRouter } from "next/navigation";
 
-export const categories = [
+ const categories = [
   {
     id: "cat-1",
     name: "Politics",

@@ -132,9 +132,15 @@ function CreateArticlePage() {
       }
     },
     onError: (error) => {
+      alert("Post creation failed. Click Publxih Again.");
       console.error("Error Post Creaion:", error);
     },
   });
+
+  function removeColorStyles(html : string): string {
+    return html.replace(/color:\s*rgb\([^)]*\);?/gi, '');
+  }
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!title || !editorRef.current?.innerHTML) {
@@ -142,7 +148,7 @@ function CreateArticlePage() {
       return;
     }
     const slug = generateSlug(title);
-    const content = editorRef.current.innerHTML;
+    const content = removeColorStyles(editorRef.current.innerHTML);
     const readTime = calculateReadTime(editorRef.current.textContent || "");
     const date = new Date().toLocaleDateString("en-US", {
       year: "numeric",
@@ -166,16 +172,8 @@ function CreateArticlePage() {
 
   return (
     <div className="min-h-screen flex flex-col ">
-      <main className="flex-1 container mx-auto px-4 py-8">
+      <main className="flex-1 container mx-auto px-4 md:px-8 py-8">
         <div className="mb-6 flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => router.push("/")}
-            className="gap-1"
-          >
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
           <h1 className="text-xl font-bold">Create New Article</h1>
         </div>
 

@@ -174,10 +174,10 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                 />
               </div>
 
-              <div className="prose max-w-full overflow-x-auto mb-8">
+              <div className="max-w-full overflow-x-auto mb-8">
                 <div
                   dangerouslySetInnerHTML={{ __html: article.content }}
-                  className="max-w-full"
+                  className=" max-w-full"
                 />
               </div>
 
@@ -234,8 +234,6 @@ function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
                   ))}
                 </div>
               </div>
-
-              
 
               {/* Comments Section */}
               <div className="mb-8">

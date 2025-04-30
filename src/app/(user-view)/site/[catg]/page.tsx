@@ -102,7 +102,7 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
   } = getCategoryData(catg);
 
   return (
-    <div className="w-full min-h-screen  container mx-10">
+    <div className="w-full min-h-screen  container md:mx-10">
         <div className="p-4">
           <div className="mb-8">
             <div className="mb-2">

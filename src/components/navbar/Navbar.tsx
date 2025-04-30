@@ -17,7 +17,6 @@ async function Navbar() {
   return <NavbarPage/>;
  } catch (error) {
   console.error(JSON.stringify(error));
-  
  }
 }
 

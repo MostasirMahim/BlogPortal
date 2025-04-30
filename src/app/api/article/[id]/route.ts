@@ -4,10 +4,10 @@ import { auth } from "@clerk/nextjs/server";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = await params;
+    const {id} =  await params;
     const post = await prisma.post.findUnique({
       where: { slug: id },
       include: {
