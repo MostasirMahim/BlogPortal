@@ -38,10 +38,10 @@ export const NavbarItems: React.FC<{
   return (
     <Link
       href={path}
-      className="md:text-lg lg:text-xl font-semibold hover:text-white hover:bg-gray-800 rounded-md p-1"
+      className="text-sm  md:text-md  font-semibold hover:text-white hover:bg-gray-800 rounded-md p-1"
     >
       <div className="flex justify-start items-center gap-2  rounded-md p-2">
-        <Icon className="w-5 h-5 lg:w-7 lg:h-7" />
+        <Icon className="w-5 h-5 " />
         <p>{name}</p>
       </div>
     </Link>
@@ -114,7 +114,7 @@ function NavbarPage() {
           className="w-32 h-20 md:w-40 md:h-24 p-2 object-contain"
         />
         {/* Mobile Menu */}
-        <div className="flex  md:hidden justify-end items-center gap-2">
+        <div className="flex md:hidden justify-end items-center gap-2">
           <div>
             {USER ? (
               <Avatar
@@ -177,13 +177,9 @@ function NavbarPage() {
               </Avatar>
             ) : (
               <SignInButton>
-                <Avatar>
-                  <AvatarImage
-                    src={"/user.png"}
-                    className="cursor-pointer dark:text-white"
-                  />
-                  <AvatarFallback>CN</AvatarFallback>
-                </Avatar>
+                <Button variant={"outline"} size={"lg"}>
+                  Sign In
+                </Button>
               </SignInButton>
             )}
           </div>

@@ -28,7 +28,7 @@ export default function UserLayout({
           >
             <Providers>
               <section className="flex flex-col min-h-screen items-center justify-start bg-gray-200 dark:bg-gray-900">
-                <div className="container mx-auto md:border-x-2 border-black dark:border-white bg-white dark:bg-black">
+                <div className="container mx-auto md:border-x-2 border-black dark:border-white bg-white dark:bg-black transform scale-100 sm:scale-[0.75] origin-top">
                   <header className="sticky top-0 z-50 ">
                     <Navbar />
                   </header>
