@@ -1,6 +1,5 @@
 "use client";
 
-
 import Link from "next/link";
 import Image from "next/image";
 import {
@@ -38,7 +37,7 @@ const getHomePageData = () => {
       id: "secondary-1",
       title: "New AI Breakthrough Promises to Transform Healthcare",
       category: "Technology",
-      image:"/placeholder.jpg",
+      image: "/placeholder.jpg",
       slug: "ai-breakthrough-healthcare",
       date: "June 11, 2023",
       likeCount: 76,
@@ -475,15 +474,15 @@ function HomePage() {
     <div className="min-h-screen flex flex-col overflow-x-hidden">
       <main className="flex-1">
         {/* Hero Section */}
-        <section className="container mx-auto px-4 py-6">
+        <section className="container mx-auto px-4 py-2">
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <Card className="col-span-1 lg:col-span-2 overflow-hidden border-0 shadow-sm">
-              <div className="relative h-[300px] md:h-[400px] w-full">
+              <div className="relative h-[300px] md:h-[350px] w-full">
                 <Image
                   src={featuredNews.image || "/placeholder.jpg"}
                   alt="Featured news"
                   fill
-                  className="object-cover"
+                  className="object-cover object-center"
                   priority
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent" />
@@ -527,11 +526,10 @@ function HomePage() {
                   key={news.id}
                   className="overflow-hidden border-0 shadow-sm"
                 >
-                  <div className="relative h-[180px] w-full">
+                  <div className="relative h-[150px] w-full">
                     <Image
                       src={news.image || "/placeholder.jpg"}
                       alt={news.title}
-                     
                       fill
                       className="object-cover"
                     />
@@ -567,8 +565,8 @@ function HomePage() {
         </section>
 
         {/* Latest News Section */}
-        <section className="container mx-auto px-4 py-8">
-          <div className="flex items-center justify-between mb-6">
+        <section className="container mx-auto px-4 py-2">
+          <div className="flex items-center justify-between mb-2">
             <h2 className="text-2xl font-bold">Latest News</h2>
             <Button variant="outline" size="sm" className="gap-1">
               View All <ChevronRight className="h-4 w-4" />
@@ -582,7 +580,7 @@ function HomePage() {
                 className="overflow-hidden border-0 shadow-sm cursor-pointer hover:shadow-lg transition-shadow duration-300 ease-in-out"
                 onClick={() => router.push(`/article/${news.slug}`)}
               >
-                <div className="relative h-[200px] w-full">
+                <div className="relative h-[150px] w-full">
                   <Image
                     src={news.image || "/placeholder.jpg"}
                     alt={news.title}

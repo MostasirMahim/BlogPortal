@@ -159,23 +159,13 @@ function EditProfilePage({ params }: { params: Promise<{ id: string }> }) {
   }
   return (
     <div className="min-h-screen flex flex-col">
-      <main className="flex-1 container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex items-center gap-2 mb-6">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push("/profile")}
-              className="gap-1"
-            >
-              <ArrowLeft className="h-4 w-4" /> Back to Profile
-            </Button>
-            <h1 className="text-2xl md:text-3xl font-bold">Edit Profile</h1>
-          </div>
+      <main className="flex-1 container mx-auto px-4">
+        <div className=" mx-auto">
+          <h1 className="text-2xl md:text-xl font-bold py-2">Edit Profile</h1>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-2">
             {/* Cover Image Section */}
-            <div className="relative h-[200px] rounded-lg overflow-hidden bg-muted">
+            <div className="relative h-[150px] rounded-lg overflow-hidden bg-muted">
               <img
                 src={coverPreview || USER?.cover || "/placeholder.jpg"}
                 alt="Cover"

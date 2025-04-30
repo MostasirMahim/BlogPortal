@@ -11,7 +11,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           <div>
             <Link href="/" className="inline-block mb-4">
-              <span className="font-bold text-2xl">DailyNews</span>
+              <span className="font-bold text-2xl">The Daily Gen-G</span>
             </Link>
             <p className="text-muted-foreground mb-4">
               Your trusted source for the latest news and in-depth reporting on

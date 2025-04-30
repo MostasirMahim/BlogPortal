@@ -40,7 +40,7 @@ export const NavbarItems: React.FC<{
       href={path}
       className="text-sm  md:text-md  font-semibold hover:text-white hover:bg-gray-800 rounded-md p-1"
     >
-      <div className="flex justify-start items-center gap-2  rounded-md p-2">
+      <div className="flex justify-start items-center gap-2  rounded-md p-1">
         <Icon className="w-5 h-5 " />
         <p>{name}</p>
       </div>
@@ -105,13 +105,13 @@ function NavbarPage() {
 
   if (isLoading) return null;
   return (
-    <div className="max-w-full bg-white dark:bg-black mx-[2px] border-b md:border-b-2 border-black dark:border-white">
-      <header className="flex justify-between items-center px-6 gap-5 mt-2">
+    <div className="max-w-full bg-white dark:bg-black mx-[1px] border-b md:border-b-2 border-black dark:border-white">
+      <header className="flex justify-between items-center px-6 gap-5 ">
         <img
           onClick={() => router.push("/")}
           src="/assets/daily.png"
           alt=""
-          className="w-32 h-20 md:w-40 md:h-24 p-2 object-contain"
+          className="w-28 h-16 object-contain"
         />
         {/* Mobile Menu */}
         <div className="flex md:hidden justify-end items-center gap-2">
@@ -149,8 +149,8 @@ function NavbarPage() {
       </header>
 
       {/* Desktop Menu */}
-      <section className="hidden md:flex justify-between items-center  gap-5 px-10">
-        <nav className="flex justify-center items-center space-x-6 space-y-2  flex-wrap ">
+      <section className="hidden md:flex justify-between items-center pb-1  gap-5 px-10 ">
+        <nav className="flex justify-center items-center space-x-6 space-y-1  flex-wrap ">
           {navbarData.map((item, index) => (
             <NavbarItems
               key={index}
@@ -177,7 +177,7 @@ function NavbarPage() {
               </Avatar>
             ) : (
               <SignInButton>
-                <Button variant={"outline"} size={"lg"}>
+                <Button variant={"outline"} size={"sm"}>
                   Sign In
                 </Button>
               </SignInButton>

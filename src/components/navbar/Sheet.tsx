@@ -59,7 +59,7 @@ function SheetComponent({
     <div>
       <Sheet open={open} onOpenChange={setOpen}>
         <SheetTrigger>
-          <div className="flex items-center justify-center h-10 w-10 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground">
+          <div className="flex items-center justify-center h-8 w-8 rounded-md border border-input bg-background hover:bg-accent hover:text-accent-foreground">
             <AlignJustify className="w-6 h-6" />
           </div>
         </SheetTrigger>

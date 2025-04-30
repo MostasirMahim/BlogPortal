@@ -93,7 +93,7 @@ function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
     <div className="min-h-screen flex flex-col">
       <main className="flex-1">
         {/* Cover Image */}
-        <div className="relative h-[200px] md:h-[300px] w-full">
+        <div className="relative h-[100px] md:h-[150px] w-full">
           <Image
             src={USER?.cover || "/placeholder.jpg"}
             alt="Cover"
@@ -105,7 +105,7 @@ function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
 
         {/* Profile Header */}
         <div className="container mx-auto px-4">
-          <div className="relative my-2 md:my-5 flex flex-col items-center md:items-start w-full">
+          <div className="relative my-1 flex flex-col items-center md:items-start w-full">
             <div className="flex flex-col md:flex-row  gap-4 items-center justify-center w-full ">
               <Avatar className="h-32 w-32 border-4 border-background">
                 <AvatarImage
@@ -171,9 +171,9 @@ function ProfilePage({ params }: { params: Promise<{ id: string }> }) {
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col md:flex-row items-center w-full justify-between gap-6">
+            <div className=" flex flex-col md:flex-row items-center w-full justify-between gap-6">
               <div>
-                <p className="text-muted-foreground mb-4">
+                <p className="text-muted-foreground px-4">
                   {USER?.bio || "No bio..."}
                 </p>
 

@@ -1,6 +1,5 @@
 "use client";
 
-
 import Image from "next/image";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -17,6 +16,7 @@ import { use, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Post } from "@/types";
 import { formatPostDate } from "@/lib/date_modify";
+import { useRouter } from "next/navigation";
 
 const getCategoryData = (slug: string) => {
   const categoryName = slug.charAt(0).toUpperCase() + slug.slice(1);
@@ -92,6 +92,7 @@ const getCategoryData = (slug: string) => {
 
 function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
   const { catg } = use(params);
+  const router = useRouter();
   const {
     categoryName,
     description,
@@ -102,214 +103,218 @@ function CategoryOverview({ params }: { params: Promise<{ catg: string }> }) {
   } = getCategoryData(catg);
 
   return (
-    <div className="w-full min-h-screen  container md:mx-10">
-        <div className="p-4">
-          <div className="mb-8">
-            <div className="mb-2">
-              <Link href="/" className="text-sm text-primary hover:underline">
-                Home
-              </Link>{" "}
-              /{" "}
-              <span className="text-sm text-muted-foreground">
-                {categoryName}
-              </span>
-            </div>
-
-            <h1 className="text-3xl font-bold mb-4">{categoryName}</h1>
-            <p className="text-muted-foreground">{description}</p>
+    <div className="w-full min-h-screen  container ">
+      <div className="p-4">
+        <div className="mb-2">
+          <div className="">
+            <Link href="/" className="text-sm text-primary hover:underline">
+              Home
+            </Link>{" "}
+            /{" "}
+            <span className="text-sm text-muted-foreground">
+              {categoryName}
+            </span>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <div className="lg:col-span-2">
-              <div className="grid grid-cols-1 gap-8">
-                {/* Featured Article */}
-                <Card className="overflow-hidden border-0 shadow-sm">
-                  <div className="relative h-[300px] w-full">
+          <h1 className="text-2xl font-bold mb-1">{categoryName}</h1>
+          <p className="text-muted-foreground">{description}</p>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2">
+            <div className="grid grid-cols-1 gap-2">
+              {/* Featured Article */}
+              <Card className="overflow-hidden border-0 shadow-sm">
+                <div className="relative h-[300px] w-full">
+                  <Image
+                    src={featuredArticle.image || "/placeholder.jpg"}
+                    alt="Featured article"
+                    fill
+                    className="object-cover"
+                  />
+                </div>
+                <CardContent className="p-6">
+                  <div className="text-sm font-medium text-primary mb-2">
+                    {categoryName}
+                  </div>
+                  <h2 className="text-xl font-bold mb-2">
+                    {featuredArticle.title}
+                  </h2>
+                  <p className="text-muted-foreground mb-4">
+                    {featuredArticle.description}
+                  </p>
+                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center gap-1">
+                        <CalendarDays className="h-4 w-4" />
+                        <span>{featuredArticle.date}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Clock className="h-4 w-4" />
+                        <span>{featuredArticle.readTime}</span>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-1">
+                        <Heart className="h-4 w-4" />
+                        <span>{featuredArticle.likeCount}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <MessageSquare className="h-4 w-4" />
+                        <span>{featuredArticle.commentCount}</span>
+                      </div>
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="px-6 pb-6 pt-0">
+                  <Button>Read More</Button>
+                </CardFooter>
+              </Card>
+
+              {/* Article List */}
+              {articles?.map((article) => (
+                <div
+                  key={article.id}
+                  className="grid grid-cols-1 md:grid-cols-3 gap-6"
+                >
+                  <div
+                    onClick={() => router.push(`/article/${article.id}`)}
+                    className="relative h-[200px] md:h-full w-full cursor-pointer"
+                  >
                     <Image
-                      src={featuredArticle.image || "/placeholder.jpg"}
-                      alt="Featured article"
+                      src={article.image || "/placeholder.jpg"}
+                      alt={`Article ${article.id}`}
                       fill
-                      className="object-cover"
+                      className="object-cover rounded-lg"
                     />
                   </div>
-                  <CardContent className="p-6">
+                  <div className="md:col-span-2">
                     <div className="text-sm font-medium text-primary mb-2">
                       {categoryName}
                     </div>
-                    <h2 className="text-2xl font-bold mb-2">
-                      {featuredArticle.title}
+                    <h2
+                      onClick={() => router.push(`/article/${article.id}`)}
+                      className="text-lg font-bold mb-2 cursor-pointer"
+                    >
+                      {article.title}
                     </h2>
-                    <p className="text-muted-foreground mb-4">
-                      {featuredArticle.description}
+                    <p className="text-muted-foreground mb-4 text-md line-clamp-3">
+                      {article.excerpt}
                     </p>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
+                    <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
                       <div className="flex items-center gap-4">
                         <div className="flex items-center gap-1">
                           <CalendarDays className="h-4 w-4" />
-                          <span>{featuredArticle.date}</span>
+                          <span>{formatPostDate(article.createdAt)}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <Clock className="h-4 w-4" />
-                          <span>{featuredArticle.readTime}</span>
+                          <span>{article.readTime}</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex items-center gap-1">
                           <Heart className="h-4 w-4" />
-                          <span>{featuredArticle.likeCount}</span>
+                          <span>{article._count.likes}</span>
                         </div>
                         <div className="flex items-center gap-1">
                           <MessageSquare className="h-4 w-4" />
-                          <span>{featuredArticle.commentCount}</span>
+                          <span>{article._count.comments}</span>
                         </div>
                       </div>
                     </div>
-                  </CardContent>
-                  <CardFooter className="px-6 pb-6 pt-0">
-                    <Button>Read More</Button>
-                  </CardFooter>
-                </Card>
 
-                <Separator />
-
-                {/* Article List */}
-                {articles?.map((article) => (
-                  <div
-                    key={article.id}
-                    className="grid grid-cols-1 md:grid-cols-3 gap-6"
-                  >
-                    <div className="relative h-[200px] md:h-full w-full">
-                      <Image
-                        src={article.image || "/placeholder.jpg"}
-                        alt={`Article ${article.id}`}
-                        fill
-                        className="object-cover rounded-lg"
-                      />
-                    </div>
-                    <div className="md:col-span-2">
-                      <div className="text-sm font-medium text-primary mb-2">
-                        {categoryName}
-                      </div>
-                      <h2 className="text-xl font-bold mb-2">
-                        {article.title}
-                      </h2>
-                      <p className="text-muted-foreground mb-4 line-clamp-3">
-                        {article.excerpt}
-                      </p>
-                      <div className="flex items-center justify-between text-sm text-muted-foreground mb-4">
-                        <div className="flex items-center gap-4">
-                          <div className="flex items-center gap-1">
-                            <CalendarDays className="h-4 w-4" />
-                            <span>{formatPostDate(article.createdAt)}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            <span>{article.readTime}</span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex items-center gap-1">
-                            <Heart className="h-4 w-4" />
-                            <span>{article._count.likes}</span>
-                          </div>
-                          <div className="flex items-center gap-1">
-                            <MessageSquare className="h-4 w-4" />
-                            <span>{article._count.comments}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Link href={`/article/${article.slug}`}>
-                        <Button variant="outline" size="sm">
-                          Read Article
-                        </Button>
-                      </Link>
-                    </div>
+                    <Link href={`/article/${article.slug}`}>
+                      <Button variant="outline" size="sm">
+                        Read Article
+                      </Button>
+                    </Link>
                   </div>
-                ))}
-
-                <div className="flex justify-center mt-4">
-                  <Button variant="outline" className="gap-1">
-                    Load More <ChevronRight className="h-4 w-4" />
-                  </Button>
                 </div>
+              ))}
+
+              <div className="flex justify-center mt-4">
+                <Button variant="outline" className="gap-1">
+                  Load More <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             </div>
+          </div>
 
-            <div className="lg:col-span-1">
-              <div className="sticky top-24">
-                <div className="bg-muted/30 p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-bold mb-4">
-                    Popular in {categoryName}
-                  </h3>
-                  <div className="space-y-4">
-                    {popularArticles.map((article) => (
-                      <div key={article.id} className="flex gap-4">
-                        <div className="relative h-16 w-16 flex-shrink-0">
-                          <Image
-                            src={article.image || "/placeholder.jpg"}
-                            alt={`Popular article ${article.id}`}
-                            fill
-                            className="object-cover rounded-md"
-                          />
-                        </div>
-                        <div>
-                          <h4 className="font-medium text-sm line-clamp-2">
-                            {article.title}
-                          </h4>
-                          <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
-                            <div className="flex items-center">
-                              <CalendarDays className="h-3 w-3 mr-1" />
-                              <span>{article.date}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <Heart className="h-3 w-3 mr-1" />
-                              <span>{article.likeCount}</span>
-                            </div>
-                            <div className="flex items-center">
-                              <MessageSquare className="h-3 w-3 mr-1" />
-                              <span>{article.commentCount}</span>
-                            </div>
+          <div className="lg:col-span-1">
+            <div className="sticky top-24">
+              <div className="bg-muted/30 p-1 rounded-lg mb-6">
+                <h3 className="text-lg font-bold mb-4">
+                  Popular in {categoryName}
+                </h3>
+                <div className="space-y-2">
+                  {popularArticles.map((article) => (
+                    <div key={article.id} className="flex gap-4">
+                      <div className="relative h-16 w-16 flex-shrink-0">
+                        <Image
+                          src={article.image || "/placeholder.jpg"}
+                          alt={`Popular article ${article.id}`}
+                          fill
+                          className="object-cover rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <h4 className="font-medium text-sm line-clamp-2">
+                          {article.title}
+                        </h4>
+                        <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+                          <div className="flex items-center">
+                            <CalendarDays className="h-3 w-3 mr-1" />
+                            <span>{article.date}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Heart className="h-3 w-3 mr-1" />
+                            <span>{article.likeCount}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <MessageSquare className="h-3 w-3 mr-1" />
+                            <span>{article.commentCount}</span>
                           </div>
                         </div>
                       </div>
-                    ))}
-                  </div>
+                    </div>
+                  ))}
                 </div>
+              </div>
 
-                <div className="bg-primary/5 p-6 rounded-lg mb-6">
-                  <h3 className="text-lg font-bold mb-4">
-                    Subscribe to {categoryName} Updates
-                  </h3>
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Get the latest {categoryName.toLowerCase()} news delivered
-                    directly to your inbox.
-                  </p>
+              <div className="bg-primary/5 p-6 rounded-lg mb-6">
+                <h3 className="text-lg font-bold mb-4">
+                  Subscribe to {categoryName} Updates
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Get the latest {categoryName.toLowerCase()} news delivered
+                  directly to your inbox.
+                </p>
 
-                  <Button className="w-full">Subscribe</Button>
-                </div>
+                <Button className="w-full">Subscribe</Button>
+              </div>
 
-                <div className="p-6 rounded-lg border">
-                  <h3 className="text-lg font-bold mb-4">Related Categories</h3>
-                  <div className="space-y-2">
-                    {relatedCategories.map((category, index) => (
-                      <Link
-                        key={index}
-                        href={`/category/${category.name.toLowerCase()}`}
-                        className="flex justify-between items-center text-sm hover:text-primary"
-                      >
-                        <span>{category.name}</span>
-                        <span className="bg-muted px-2 py-1 rounded-full text-xs">
-                          {category.count}
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
+              <div className="p-6 rounded-lg border">
+                <h3 className="text-lg font-bold mb-4">Related Categories</h3>
+                <div className="space-y-2">
+                  {relatedCategories.map((category, index) => (
+                    <Link
+                      key={index}
+                      href={`/category/${category.name.toLowerCase()}`}
+                      className="flex justify-between items-center text-sm hover:text-primary"
+                    >
+                      <span>{category.name}</span>
+                      <span className="bg-muted px-2 py-1 rounded-full text-xs">
+                        {category.count}
+                      </span>
+                    </Link>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         </div>
+      </div>
     </div>
   );
 }
